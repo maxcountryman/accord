@@ -49,10 +49,11 @@
   [serv & [query-params]]
 
   (let [url (:authorize-url @serv)
-        id (:client-id @serv)
-        query-params (or query-params {})
-        params (assoc query-params :client_id id)]
-    (str url "?" (encode-params params))))
+        id (:client-id @serv)]
+    (->>
+      (assoc query-params :client_id id)
+      encode-params
+      (str url "?"))))
 
 
 (defn get-access-token
