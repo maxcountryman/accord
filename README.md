@@ -59,7 +59,7 @@ token.
 
 ```clojure
 (oauth2/get-access-token fb {:query-params {:code code
-                                            :redirect_uri redirect-uri})
+                                            :redirect_uri redirect-uri}})
 ```
 
 Because the `fb` var is a ref, calling this function updates the proper
@@ -68,7 +68,8 @@ authenticated requests with the provider. In other words, we have an accord
 with the provider.
 
 ```clojure
-(def user (parse-string (:body (oauth2/get fb "me")) true))
+(require '[accord.client :as client])  ;; require our HTTP client wrapper
+(def user (parse-string (:body (client/get fb "me")) true))
 (println "currently logged in as: " (:name user))
 ; => "currently logged in as: Foo Bar"
 ```
