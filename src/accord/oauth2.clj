@@ -117,11 +117,36 @@
 ;; ## Resource Retrieval
 
 
+(defn- attach-token
+  "
+  Given a `token`, `req` map and `bearer_auth` bool, attaches a given token to
+  the request. Returns a map.
+  "
+  [serv req bearer-auth]
+  (let [token (:access-token @serv)]
+    (if (not bearer-auth)
+      (update-in req [:query-params] merge {:access_token token})
+      (->>
+        {"Authorization" (str "Bearer " token)}
+        (update-in req [:headers] merge)))))
+
+
+(defn- format-url
+  [serv req]
+  (let [base-url (:base-url @serv)
+        url (:url req)]
+    (merge req {:url (if (and base-url (relative? url))
+                       (str base-url url)
+                       url)})))
+
+
 (defn request
   "
   Given a `serv` ref and a `req` map, makes an HTTP request against a service
   providers resource. This function handles attaching the necessary
   authentication parameters to the request.
+
+  Optionally takes a `bearer-auth` bool. Defaults to `true`.
 
   Generally this function need not be invoked directly.
   Instead the corresponding HTTP verb functions may be used in its place.
@@ -131,16 +156,12 @@
     (request fb {:url \"https://graph.facebook.com/me\"
                  :method :get})
   "
-  [serv req & {:keys [bearer_auth] :or [bearer_auth true]}]
+  [serv req & {:keys [bearer-auth] :or {bearer-auth true}}]
 
-    (let [req (update-in req [:query-params] merge {:access_token
-                                                    (:access-token @serv)})
-          has-base? (not (nil? (:base-url @serv)))
-          req-url (:url req)
-          url (if (and has-base? (relative? req-url))
-                (str (:base-url @serv) req-url)
-                req-url)]
+    (let [req (->>
+                (attach-token serv req bearer-auth)
+                (format-url serv))]
 
-      (client/check-url! url)
+      (client/check-url! (:url req))
 
-      (client/request (merge req {:url url}))))
+      (client/request req)))
