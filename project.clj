@@ -4,4 +4,6 @@
   :license {:name "BSD"
             :url "http://opensource.org/licenses/BSD-3-Clause"}
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [clj-http "0.6.5"]])
+                 [clj-http "0.6.5"],
+                 [clojurewerkz/urly "1.0.0"]]
+  :plugins [[lein-marginalia "0.7.1"]])

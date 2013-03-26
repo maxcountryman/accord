@@ -49,7 +49,7 @@ to visit it.
 (oauth2/make-authorize-url fb {:scope "read_stream"
                                :response_type "code"
                                :redirect_uri redirect-uri})
-; => "https://graph.facebook.com/oauth/authorize?client_id=440483442642551&scope=read_stream&response_type=code&redirect_uri=https%3A%2F%2Fwww.facebook.com%2Fconnect%2Flogin_success.html"
+; => "https://graph.facebook.com/oauth/authorize?client_id=..."
 ```
 
 Typically the redirect URI would direct the user back to your application. On
@@ -68,8 +68,8 @@ authenticated requests with the provider. In other words, we have an accord
 with the provider.
 
 ```clojure
-(require '[accord.client :as client])  ;; require our HTTP client wrapper
-(def user (parse-string (:body (client/get fb "me")) true))
+(require '[accord.http :as http])  ;; require our HTTP client wrapper
+(def user (parse-string (:body (http/get fb "me")) true))
 (println "currently logged in as: " (:name user))
 ; => "currently logged in as: Foo Bar"
 ```
