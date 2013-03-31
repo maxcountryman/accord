@@ -1,6 +1,8 @@
+;; ## OAuth 1.0 Handlers
+
+
 (ns accord.oauth1
-  (:require [accord.util :refer [a->str
-                                 entity-methods
+  (:require [accord.util :refer [entity-methods
                                  in?
                                  rfc-3986-url-encode
                                  url-form-encode]]
@@ -18,8 +20,23 @@
 
 
 (defn service
+  "
+  Defines a service ref to be used for making authorized HTTP calls against an
+  OAuth 1.0a provider.
+
+  For example, we could define a ref bound to the `tw` var like this:
+
+    (def auth-url \"https://api.twitter.com/oauth/authorize\")
+    (def req-token-url \"https://api.twitter.com/oauth/request_token\")
+    (ref token-url \"https://api.twitter.com/oauth/access_token\")
+
+    (def tw (service 123 456 auth-url token-url req-token-url)))
+
+  Returns a ref.
+  "
   [consumer-key
    consumer-secret
+   authorize-url
    access-token-url
    request-token-url
    & {:keys [access-token access-token-secret base-url]}]
@@ -31,6 +48,35 @@
         :access-token-secret access-token-secret
         :base-url base-url
         :request request}))
+
+
+;; ## Authorization Helpers
+
+
+(defn get-request-token
+  [serv [& req]]
+  ,,,)
+
+
+(defn make-authorize-url
+  "
+  Given a `serv` ref, creates an authorize URL that should be presented to the
+  user. Additional query string parameters map be passed in as a map. Returns
+  the authorize URL.
+
+  If we were constructing an authorize URL for Facebook, we could do this:
+
+    (make-authorize-url fb {:scope \"read_stream\"
+                            :response_type \"code\"
+                            :redirect_uri redirect-uri})
+
+  Assume that you have a var `redirect-uri` as appropriate for your program.
+  "
+  [serv token [& query-params]]
+  (->>
+    (assoc query-params :oauth_token token)
+    rfc-3986-url-encode
+    (str (:request-token-url @serv) "?")))
 
 
 ;; ## Resource Retrieval
@@ -108,9 +154,9 @@
 
 (defn- auth-header
   ([params]
-   (let [encoded (map (fn [[k v]] (str (rfc-3986-url-encode (a->str k))
+   (let [encoded (map (fn [[k v]] (str (rfc-3986-url-encode k)
                                        "=\""
-                                       (rfc-3986-url-encode (a->str v))
+                                       (rfc-3986-url-encode v)
                                        "\""))
                      params)]
      (str "OAuth " (join ", " encoded))))
@@ -120,7 +166,7 @@
 
 (defn- entity-method
   [req]
-  (update-in req [:body-params] merge (:oauth-params req)))
+  (update-in req [:body] merge (:oauth-params req)))
 
 
 (defn- attach-creds
