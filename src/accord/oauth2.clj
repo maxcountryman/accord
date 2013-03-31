@@ -9,7 +9,7 @@
 
 
 (ns accord.oauth2
-  (:require [accord.util :refer [encode-params
+  (:require [accord.util :refer [rfc-3986-url-encode
                                  entity-methods
                                  in?
                                  parse-qs]]
@@ -44,12 +44,12 @@
    & {:keys [access-token base-url]}]
 
   (ref {:client-id client-id
-         :client-secret client-secret
-         :authorize-url authorize-url
-         :access-token-url access-token-url
-         :access-token access-token
-         :base-url base-url
-         :request request}))
+        :client-secret client-secret
+        :authorize-url authorize-url
+        :access-token-url access-token-url
+        :access-token access-token
+        :base-url base-url
+        :request request}))
 
 
 ;; ## Authorization Helpers
@@ -75,7 +75,7 @@
         id (:client-id @serv)]
     (->>
       (assoc query-params :client_id id)
-      encode-params
+      rfc-3986-url-encode
       (str url "?"))))
 
 
