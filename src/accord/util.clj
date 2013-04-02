@@ -15,7 +15,7 @@
 
 (defn rfc-3986-url-encode
   [unencoded]
-  (-> (url-encode unencoded)
+  (-> (url-encode (a->str unencoded))
       (.replace "+" "%20")
       (.replace "*" "%2A")
       (.replace "%7E" "~")))
@@ -24,9 +24,9 @@
 (defn url-form-encode
   [params]
   (join "&" (map (fn [[k v]]
-                   (str (rfc-3986-url-encode (a->str k))
+                   (str (rfc-3986-url-encode k)
                         "="
-                        (rfc-3986-url-encode (a->str v)))) params)))
+                        (rfc-3986-url-encode v))) params)))
 
 
 (defn parse-qs
